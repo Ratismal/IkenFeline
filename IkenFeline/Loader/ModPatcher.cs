@@ -107,7 +107,7 @@ namespace IkenFeline.Loader
         {
             using (var monoModder = new RuntimeMonoModder(ass, assName))
             {
-                monoModder.LogVerboseEnabled = true;
+                monoModder.LogVerboseEnabled = false;
                 monoModder.DependencyDirs.AddRange(ResolveDirectories);
 
                 var resolver = (BaseAssemblyResolver)monoModder.AssemblyResolver;
