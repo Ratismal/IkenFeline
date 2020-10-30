@@ -13,5 +13,10 @@ namespace LittleWitch
         {
             return true;
         }
+
+        public override bool InHitArea(BattleGrid grid, BattleUnit unit, VectorI target, VectorI tile)
+        {
+            return true;
+        }
     }
 }

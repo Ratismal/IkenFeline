@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7C24F192-6993-46D2-A3E9-3B7A7EBB4E8B}</ProjectGuid>
+    <ProjectGuid>{7113946D-2BA9-44D1-AE00-39FD39F473F7}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LittleWitch.TestMod.mm</RootNamespace>
-    <AssemblyName>LittleWitch.TestMod.mm</AssemblyName>
+    <RootNamespace>Ikenfell.IkenFeline.mm</RootNamespace>
+    <AssemblyName>Ikenfell.IkenFeline.mm</AssemblyName>
     <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -30,12 +30,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="GameEngine">
       <HintPath>..\lib\ikenfell\GameEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="IkenfellWin">
+      <HintPath>..\lib\ikenfell\IkenfellWin.exe</HintPath>
     </Reference>
     <Reference Include="LittleWitch">
       <HintPath>..\lib\ikenfell\LittleWitch.dll</HintPath>
@@ -80,21 +80,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Patches\patch_AbilityIgnite.cs" />
-    <Compile Include="Patches\patch_Game.cs" />
-    <Compile Include="Patches\patch_TitleScreen.cs" />
-    <Compile Include="Paths.cs" />
+    <Compile Include="Patches\MainProgram.cs" />
+    <Compile Include="Patches\patch_Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <ProjectReference Include="..\IkenFeline\IkenFeline.csproj">
+      <Project>{467e33cd-90b4-4bbb-8131-ecf45438628f}</Project>
+      <Name>IkenFeline</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>pwd
-rm -r ../../../game/IkenFeline/mods/TestMod
-mkdir "../../../game/IkenFeline/mods/TestMod"
-cp LittleWitch.TestMod.mm.dll ../../../game/IkenFeline/mods/TestMod/LittleWitch.TestMod.mm.dll
-</PostBuildEvent>
+    <PostBuildEvent>cp Ikenfell.IkenFeline.mm.dll ../../../game/IkenfellWin.IkenFeline.mm.dll
+cp Ikenfell.IkenFeline.mm.dll ../../../game/IkenfellLinux.IkenFeline.mm.dll
+cd ../../../game
+
+MonoMod.exe IkenfellWin.exe</PostBuildEvent>
   </PropertyGroup>
 </Project>
