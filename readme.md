@@ -13,6 +13,8 @@ Either look at the individual instructions within each project, or
 3. Run `patch.bat` (sorry linux users)
 4. Run `MONOMODDED_IkenfellWin.exe`
 
+To get it to work with Steam, overwrite `IkenfellWin.exe` with your `MONOMODDED_IkenfellWin.exe` file. I'd recommend making a backup first.
+
 ## TestMod
 
 I included a small test mod in the release which does the following:
