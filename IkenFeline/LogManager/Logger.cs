@@ -62,6 +62,10 @@ namespace IkenFeline.LogManager
 
         public static void Log(string format, params object[] list)
         {
+            LogDirect(format, list);
+        }
+        public static void LogDirect(string format, object[] list)
+        {
             Console.WriteLine(format, list);
             SinglefileWriter.WriteLine(format, list);
             System.Diagnostics.Debug.WriteLine(format, list);

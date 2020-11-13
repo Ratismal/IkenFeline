@@ -19,6 +19,7 @@ namespace LittleWitch
         [MonoModConstructor]
         public void ctor()
         {
+            Console.WriteLine("No splashes here!");
             // disable splash screens so we can get right into the game
             DoSplashScreens = false;
             DoPressAToStart = false;

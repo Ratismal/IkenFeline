@@ -40,6 +40,10 @@
     <Reference Include="LittleWitch">
       <HintPath>..\lib\ikenfell\LittleWitch.dll</HintPath>
     </Reference>
+    <Reference Include="MMHOOK_LittleWitch, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\ikenfell\MMHOOK_LittleWitch.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\lib\monomod\Mono.Cecil.dll</HintPath>
     </Reference>
@@ -81,13 +85,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Patches\patch_AbilityIgnite.cs" />
+    <Compile Include="Patches\patch_BattleLayouts.cs" />
     <Compile Include="Patches\patch_Game.cs" />
     <Compile Include="Patches\patch_TitleScreen.cs" />
-    <Compile Include="Paths.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestMod.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IkenFeline\IkenFeline.csproj">
+      <Project>{467E33CD-90B4-4BBB-8131-ECF45438628F}</Project>
+      <Name>IkenFeline</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

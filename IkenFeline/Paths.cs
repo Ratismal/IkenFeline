@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace IkenFeline
 {
-    class Paths
+    public class Paths
     {
         public static string ExecutableDirectory { get; private set; }
         public static string WorkingDirectory { get; private set; }

@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS0626 // Method, operator, or accessor is marked external and has no attributes on it
 
 using GameEngine;
-using IkenFeline;
 using MonoMod;
 using System;
 using System.Collections;
@@ -20,6 +19,7 @@ namespace LittleWitch
         [MonoModConstructor]
         public void ctor()
         {
+            Console.WriteLine("No splashes here!");
             // disable splash screens so we can get right into the game
             DoSplashScreens = false;
             DoPressAToStart = false;

@@ -81,7 +81,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Patches\MainProgram.cs" />
-    <Compile Include="Patches\patch_Program.cs" />
+    <Compile Include="Patches\patch_SteamAPI.cs" />
+    <Compile Include="Patches\patch_LinuxProgram.cs" />
+    <Compile Include="Patches\patch_WinProgram.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -94,8 +96,13 @@
   <PropertyGroup>
     <PostBuildEvent>cp Ikenfell.IkenFeline.mm.dll ../../../game/IkenfellWin.IkenFeline.mm.dll
 cp Ikenfell.IkenFeline.mm.dll ../../../game/IkenfellLinux.IkenFeline.mm.dll
+
 cd ../../../game
 
-MonoMod.exe IkenfellWin.exe</PostBuildEvent>
+MonoMod.exe IkenfellWin.exe
+MonoMod.RuntimeDetour.HookGen.exe LittleWitch.dll
+MonoMod.RuntimeDetour.HookGen.exe GameEngine.dll
+
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

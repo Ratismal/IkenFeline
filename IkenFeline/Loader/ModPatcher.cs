@@ -1,4 +1,6 @@
-﻿using IkenFeline.LogManager;
+﻿using IkenFeline.Attributes;
+using IkenFeline.Hooks;
+using IkenFeline.LogManager;
 using Mono.Cecil;
 using System;
 using System.Collections.Generic;
@@ -13,48 +15,69 @@ namespace IkenFeline.Loader
 {
     public class ModPatcher
     {
-        private static RuntimeMonoModder modder;
         private static HashSet<string> patchSets;
         private static HashSet<string> assemblies;
         private static HashSet<string> patches;
-        private static AppDomain domain;
+        private static List<Type> modTypes;
+        public static List<IkenFelineMod> Mods;
 
         public static string[] ResolveDirectories { get; set; }
-        
 
         private static readonly HashSet<string> UnpatchableAssemblies =
             new HashSet<string>(StringComparer.CurrentCultureIgnoreCase) { "mscorlib" };
 
         public static void Initialize()
         {
-            AppDomain.CurrentDomain.SetupInformation.DisallowApplicationBaseProbing = true;
-            AppDomain.CurrentDomain.AssemblyResolve += InterceptResolveEventHandler;
+            modTypes = new List<Type>();
             Logger.Log("Checking for patches...");
             ResolveDirectories = new string[] {
                 Paths.ExecutableDirectory,
+                Paths.ModDirectory
             };
-
-            AppDomainSetup domaininfo = new AppDomainSetup();
-            domaininfo.ApplicationBase = Paths.ExecutableDirectory;
-            Evidence adevidence = AppDomain.CurrentDomain.Evidence;
-            domain = AppDomain.CreateDomain("PatchedGame", adevidence, domaininfo);
-
-            // AppDomain.Unload(domain);
 
             CollectPatchSets();
             CollectPatches();
 
+            ResolveDirectories = ResolveDirectories.Concat(patchSets).ToArray();
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AppDomainResolveHandler);
+
             ApplyPatches();
 
+            Mods = new List<IkenFelineMod>();
+            foreach (Type type in modTypes)
+            {
+                var mod = (IkenFelineMod)Activator.CreateInstance(type);
+                IkenFelineModAttribute attribute = (IkenFelineModAttribute)type.GetCustomAttribute(typeof(IkenFelineModAttribute));
+                mod.ModName = attribute.Name;
+                mod.ModId = attribute.ModId;
+                mod.Version = attribute.Version;
+                Logger.Log("Loaded Mod: {1} v{2} ({0})", mod.ModId, mod.ModName, mod.Version);
+                Mods.Add(mod);
+                mod.Load();
+            }
 
-            // domain.ExecuteAssembly("MONOMODDED_IkenfellWin.exe");
+            foreach (var mod in Mods)
+            {
+                mod.PostLoad();
+            }
+
+            ModHooks.CreateHooks();
         }
 
-        private static Assembly InterceptResolveEventHandler(object sender, ResolveEventArgs args)
+        static void FindMods(Assembly assembly)
         {
-            System.Diagnostics.Debug.WriteLine("wtf");
-            System.Diagnostics.Debug.WriteLine(args.Name);
-            return null;
+            try
+            {
+                foreach (Type type in assembly.GetTypes())
+                {
+                    if (type.GetCustomAttributes(typeof(IkenFelineModAttribute), true).Length > 0)
+                    {
+                        modTypes.Add(type);
+                    }
+                }
+            } catch (Exception e) {
+                Logger.Log(e.StackTrace);
+            }
         }
 
         private static void CollectPatchSets()
@@ -66,6 +89,14 @@ namespace IkenFeline.Loader
             foreach (var dir in directories)
             {
                 patchSets.Add(dir);
+
+                var baseName = Path.GetFileNameWithoutExtension(dir);
+                var basePath = Path.Combine(dir, baseName + ".dll");
+                if (File.Exists(basePath))
+                {
+                    var assembly = Assembly.LoadFrom(basePath);
+                    FindMods(assembly);
+                }
             }
         }
 
@@ -140,10 +171,12 @@ namespace IkenFeline.Loader
             File.Move(originalPath, tempPath);
             File.Move(outputPath, originalPath);
 
-            Assembly.Load(assemblyName);
+            var assembly = Assembly.Load(assemblyName);
 
             File.Move(originalPath, outputPath);
             File.Move(tempPath, originalPath);
+
+            FindMods(assembly);
         }
 
         public static void ApplyPatches()
@@ -157,30 +190,65 @@ namespace IkenFeline.Loader
             }
         }
 
-        private static AssemblyDefinition ResolverOnResolveFailure(object sender, AssemblyNameReference reference)
+        private static List<string> FindPotentialResolveFiles(string name)
         {
+            var potentialDirectories = new List<string>();
+            var potentialFiles = new List<string>();
+
+            if (name.IndexOf(",") > -1)
+            {
+                name = name.Substring(0, name.IndexOf(","));
+            }
+
             foreach (var directory in ResolveDirectories)
             {
-                var potentialDirectories = new List<string> { directory };
-
                 potentialDirectories.AddRange(Directory.GetDirectories(directory, "*", SearchOption.AllDirectories));
 
-                var potentialFiles = potentialDirectories.Select(x => Path.Combine(x, $"{reference.Name}.dll"))
-                                                         .Concat(potentialDirectories.Select(
-                                                                     x => Path.Combine(x, $"{reference.Name}.exe")));
+                potentialFiles.AddRange(potentialDirectories.Select(x => Path.Combine(x, $"{name}.dll"))
+                                                            .Concat(potentialDirectories.Select(
+                                                                        x => Path.Combine(x, $"{name}.exe"))));
+            }
+            return potentialFiles;
+        }
 
-                foreach (string path in potentialFiles)
+        private static Assembly AppDomainResolveHandler(object sender, ResolveEventArgs args)
+        {
+            var potentialFiles = FindPotentialResolveFiles(args.Name);
+            foreach (string path in potentialFiles)
+            {
+                if (!File.Exists(path))
+                    continue;
+
+                var assembly = AssemblyDefinition.ReadAssembly(path, new ReaderParameters(ReadingMode.Deferred));
+
+                if (assembly.Name.FullName == args.Name)
                 {
-                    if (!File.Exists(path))
-                        continue;
-
-                    var assembly = AssemblyDefinition.ReadAssembly(path, new ReaderParameters(ReadingMode.Deferred));
-
-                    if (assembly.Name.Name == reference.Name)
-                        return assembly;
-
                     assembly.Dispose();
+                    var loadedAssembly = Assembly.LoadFrom(path);
+                    FindMods(loadedAssembly);
+                    return loadedAssembly;
                 }
+
+                assembly.Dispose();
+            }
+
+            return null;
+        }
+
+        private static AssemblyDefinition ResolverOnResolveFailure(object sender, AssemblyNameReference reference)
+        {
+            var potentialFiles = FindPotentialResolveFiles(reference.Name);
+            foreach (string path in potentialFiles)
+            {
+                if (!File.Exists(path))
+                    continue;
+
+                var assembly = AssemblyDefinition.ReadAssembly(path, new ReaderParameters(ReadingMode.Deferred));
+
+                if (assembly.Name.Name == reference.Name)
+                    return assembly;
+
+                assembly.Dispose();
             }
 
             return null;
