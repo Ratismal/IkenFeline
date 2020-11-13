@@ -21,6 +21,7 @@ namespace LittleWitch
         {
             Console.WriteLine("No splashes here!");
             // disable splash screens so we can get right into the game
+            // throw new Exception("wow!");
             DoSplashScreens = false;
             DoPressAToStart = false;
             DoIntroAnimation = false;

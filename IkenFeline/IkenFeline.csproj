@@ -31,13 +31,16 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GameEngine">
+    <Reference Include="GameEngine, Version=1.0.7590.27836, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\ikenfell\GameEngine.dll</HintPath>
     </Reference>
     <Reference Include="IkenfellWin">
       <HintPath>..\lib\ikenfell\IkenfellWin.exe</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="LittleWitch">
+    <Reference Include="LittleWitch, Version=1.0.7590.27837, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\ikenfell\LittleWitch.dll</HintPath>
     </Reference>
     <Reference Include="MMHOOK_LittleWitch">

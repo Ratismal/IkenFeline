@@ -20,7 +20,10 @@ namespace IkenFeline.Loader
             Module = assembly.MainModule;
             this.assemblyName = assemblyName;
 
-            OutputPath = Path.Combine(Paths.ExecutableDirectory, $"_{assemblyName}");
+            var ass = Path.GetFileNameWithoutExtension(assemblyName);
+            var ext = Path.GetExtension(assemblyName);
+
+            OutputPath = Path.Combine(Paths.ExecutableDirectory, $"{ass}.Modded{ext}");
             Logger.Log(assemblyName);
         }
 

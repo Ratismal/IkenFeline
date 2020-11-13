@@ -38,10 +38,15 @@ namespace IkenFeline.Loader
             CollectPatchSets();
             CollectPatches();
 
+            BackupFiles();
+
             ResolveDirectories = ResolveDirectories.Concat(patchSets).ToArray();
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AppDomainResolveHandler);
 
             ApplyPatches();
+
+            ReplaceFiles();
+            LoadFiles();
 
             Mods = new List<IkenFelineMod>();
             foreach (Type type in modTypes)
@@ -62,6 +67,67 @@ namespace IkenFeline.Loader
             }
 
             ModHooks.CreateHooks();
+        }
+
+        static void BackupFiles()
+        {
+            foreach (var assembly in assemblies) {
+                var ass = Path.GetFileNameWithoutExtension(assembly);
+                var ext = Path.GetExtension(assembly);
+                var originalPath = Path.Combine(Paths.ExecutableDirectory, $"{ass}");
+                var outputPath = Path.Combine(Paths.ExecutableDirectory, $"{ass}.Modded");
+                var tempPath = Path.Combine(Paths.ExecutableDirectory, $"{ass}.Original");
+
+                // backup files
+                if (!File.Exists(tempPath + ext))
+                {
+                    File.Copy(originalPath + ext, tempPath + ext);
+                    if (File.Exists(originalPath + ".pdb"))
+                    {
+                        File.Copy(originalPath + ".pdb", tempPath + ".pdb");
+                    }
+                }
+                else if (File.Exists(tempPath + ext))
+                {
+                    File.Delete(originalPath + ext);
+                    File.Delete(originalPath + ".pdb");
+
+                    File.Copy(tempPath + ext, originalPath + ext);
+                    if (File.Exists(tempPath + ".pdb"))
+                    {
+                        File.Copy(tempPath + ".pdb", originalPath + ".pdb");
+                    }
+                }
+            }
+        }
+
+        static void ReplaceFiles()
+        {
+            foreach (var assembly in assemblies)
+            {
+                var ass = Path.GetFileNameWithoutExtension(assembly);
+                var ext = Path.GetExtension(assembly);
+                var originalPath = Path.Combine(Paths.ExecutableDirectory, $"{ass}");
+                var outputPath = Path.Combine(Paths.ExecutableDirectory, $"{ass}.Modded");
+                var tempPath = Path.Combine(Paths.ExecutableDirectory, $"{ass}.Original");
+
+                File.Delete(originalPath + ext);
+                File.Delete(originalPath + ".pdb");
+
+                File.Copy(outputPath + ext, originalPath + ext);
+                File.Copy(outputPath + ".pdb", originalPath + ".pdb");
+
+                var a = Assembly.LoadFrom(originalPath + ext);
+                FindMods(a);
+            }
+        }
+
+        static void LoadFiles()
+        {
+            foreach (var assembly in assemblies)
+            {
+                
+            }
         }
 
         static void FindMods(Assembly assembly)
@@ -160,25 +226,6 @@ namespace IkenFeline.Loader
             }
         }
 
-        // yeah.... this is really bad
-        public static void SwapsieDoodles(string assemblyName)
-        {
-            var originalPath = Path.Combine(Paths.ExecutableDirectory, $"{assemblyName}");
-            var outputPath = Path.Combine(Paths.ExecutableDirectory, $"_{assemblyName}");
-            var tempPath = Path.Combine(Paths.ExecutableDirectory, $"__{assemblyName}");
-            assemblyName = assemblyName.Replace(".dll", "");
-
-            File.Move(originalPath, tempPath);
-            File.Move(outputPath, originalPath);
-
-            var assembly = Assembly.Load(assemblyName);
-
-            File.Move(originalPath, outputPath);
-            File.Move(tempPath, originalPath);
-
-            FindMods(assembly);
-        }
-
         public static void ApplyPatches()
         {
             foreach (var assName in assemblies) {
@@ -186,7 +233,6 @@ namespace IkenFeline.Loader
                 {
                     ApplyPatch(ass, assName);
                 }
-                SwapsieDoodles(assName);
             }
         }
 

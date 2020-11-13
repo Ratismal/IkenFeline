@@ -100,8 +100,8 @@ cp Ikenfell.IkenFeline.mm.dll ../../../game/IkenfellLinux.IkenFeline.mm.dll
 cd ../../../game
 
 MonoMod.exe IkenfellWin.exe
-MonoMod.RuntimeDetour.HookGen.exe LittleWitch.dll
-MonoMod.RuntimeDetour.HookGen.exe GameEngine.dll
+rem MonoMod.RuntimeDetour.HookGen.exe LittleWitch.dll
+rem MonoMod.RuntimeDetour.HookGen.exe GameEngine.dll
 
 </PostBuildEvent>
   </PropertyGroup>
