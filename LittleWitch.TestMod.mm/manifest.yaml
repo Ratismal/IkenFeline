@@ -1,0 +1,8 @@
+﻿ModId: me.stupidcat.testmod
+Name: Test Mod
+Version: 0.0.1
+Description: A test mod to demonstrate the capabilities of IkenFeline
+Main: LittleWitch.TestMod.mm.dll
+MainClass: TestMod.TestMod
+Patches:
+- LittleWitch.TestMod.mm.dll

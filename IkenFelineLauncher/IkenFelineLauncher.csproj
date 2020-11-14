@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>IkenFelineWin</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net47</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>Preview</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>C:\Users\cat\modding\ikenfell\IkenFeline\game\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	<ApplicationIcon>star.ico</ApplicationIcon>
+	<StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IkenFeline\IkenFeline.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="GameEngine">
+      <HintPath>..\lib\ikenfell\GameEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="LittleWitch">
+      <HintPath>..\lib\ikenfell\LittleWitch.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

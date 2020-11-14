@@ -15,7 +15,7 @@ namespace LittleWitch
         [MonoModConstructor]
         public void ctor()
         {
-           
+            TestMod.TestMod.Instance.Logger.Log("Catch me before the game starts, how about that?");
 
             orig_ctor();
             // LoggingManager.Dispose();

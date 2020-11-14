@@ -35,7 +35,7 @@ namespace IkenFeline.LogManager
                 Writer.AutoFlush = true;
                 SinglefileWriter.AutoFlush = true;
 
-                Console.SetOut(Writer);
+                // Console.SetOut(Writer);
                 Started = true;
             }
             catch
@@ -43,7 +43,7 @@ namespace IkenFeline.LogManager
 
             }
 
-            Log("=======================\n| IKENFELINE\n| {0:yy-MM-dd H:mm:ss}\n=======================\n", DateTime.Now);
+            LogDirect("=======================\n| IKENFELINE\n| {0:yy-MM-dd H:mm:ss}\n=======================\n", new object[] { DateTime.Now });
             Log("Initialized logger.");
         }
 
@@ -62,11 +62,12 @@ namespace IkenFeline.LogManager
 
         public static void Log(string format, params object[] list)
         {
-            LogDirect(format, list);
+            LogDirect("[IkenFeline] " + format, list);
         }
         public static void LogDirect(string format, object[] list)
         {
             Console.WriteLine(format, list);
+            Writer.WriteLine(format, list);
             SinglefileWriter.WriteLine(format, list);
             System.Diagnostics.Debug.WriteLine(format, list);
         }

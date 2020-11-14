@@ -31,17 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="GameEngine, Version=1.0.7590.27836, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\ikenfell\GameEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="IkenfellWin">
-      <HintPath>..\lib\ikenfell\IkenfellWin.exe</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="LittleWitch, Version=1.0.7590.27837, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\ikenfell\LittleWitch.dll</HintPath>
+    <Reference Include="GameEngine, Version=1.0.7590.27836, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="LittleWitch.Modded">
+      <HintPath>..\lib\ikenfell\LittleWitch.Modded.dll</HintPath>
     </Reference>
     <Reference Include="MMHOOK_LittleWitch">
       <HintPath>..\lib\ikenfell\MMHOOK_LittleWitch.dll</HintPath>
@@ -84,21 +76,28 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="YamlDotNet, Version=8.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
+      <HintPath>..\packages\YamlDotNet.8.1.2\lib\net45\YamlDotNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\IkenFelineModAttribute.cs" />
     <Compile Include="Hooks\hooks_Game.cs" />
     <Compile Include="IkenFeline.cs" />
-    <Compile Include="IkenFelineMod.cs" />
+    <Compile Include="Loader\AssetLoader.cs" />
+    <Compile Include="Loader\ModLoader.cs" />
+    <Compile Include="Mod\IkenFelineMod.cs" />
     <Compile Include="Loader\ModPatcher.cs" />
     <Compile Include="Loader\RuntimeMonoModder.cs" />
     <Compile Include="LogManager\Logger.cs" />
     <Compile Include="LogManager\ModLogger.cs" />
+    <Compile Include="Mod\ModManifest.cs" />
     <Compile Include="Paths.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Loader\readme.md" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -29,14 +29,7 @@ I have never done anything related to modding or modloading or assembly patching
 
 ## Developers
 
-There's multiple ways you can utilize IkenFeline.
-1. Create regular monomod patches and put them in the mod folder
-1. Reference the included `MMHOOK_LittleWitch.dll` and `MMHOOK_GameEngine.dll` for easier hooking of functions [see HookGen docs](https://github.com/MonoMod/MonoMod/blob/master/README-RuntimeDetour.md#using-hookgen)
-1. Create an `IkenFelineMod` class
-
-You can do any or all of the above. An `IkenFelineMod` class is probably preferable going forward, as it'll provide infrastructure with IkenFeline - just remember to reference `IkenFeline.dll` in your project!
-
-Best practices would be to include all of your files within a single directory inside the mod folder. So for example,
+When making your mod, you need to make sure that you use a proper layout. You need a folder, assemblies/other content in the folder, and a manifest.yaml file. An example setup might look like this:
 ```
 - IkenFeline
   - mods
@@ -44,11 +37,85 @@ Best practices would be to include all of your files within a single directory i
       - YourMod.dll
       - LittleWitch.YourMod.mm.dll
       - GameEngine.YourMod.mm.dll
+      - manifest.yaml
 ```
 
-### Patches
+### Manifest
 
-Patches are the classic IkenFeline way, by just directly throwing your patches into the respective assemblies. For example, if you wanted to patch Maritte's ignite ability to, say, have infinite range, you could do this:
+The first thing you need to do to get started with IkenFeline is create a manifest file. This will tell IkenFeline information about your mod, as well as how it should be loaded. For example,
+```yaml
+ModId: me.stupidcat.testmod # the ID of your mod, can be anything as long as it's UNIQUE
+Name: Test Mod
+Version: 0.0.1
+Description: A test mod to demonstrate the capabilities of IkenFeline
+Main: LittleWitch.TestMod.mm.dll # this must be the location of the assembly that your mod class resides in
+MainClass: TestMod.TestMod # this must be the full location to your mod class (including namespaces)
+Patches: # an optional array of patches. note that patches can reside in your main assembly!
+- LittleWitch.TestMod.mm.dll
+```
+
+It's very important that you include the Main and MainClass properties, and that they reference a class extending from IkenFelineMod, or your mod won't get loaded!
+
+### Mod Class
+
+You must expose a Mod Class that extends from IkenFelineMod. This will serve as your base of operations, and is where IkenFeline will send you events and hooks and stuff. Here's an example:
+```cs
+public class YourCoolMod : IkenFelineMod
+{
+  public static YourCoolMod Instance;
+
+  public YourCoolMod(ModManifest manifest) : base(manifest)
+  {
+    Instance = this;
+  }
+
+  public override void Load()
+  {
+      Logger.Log("Hello, world!");
+  }
+}
+```
+
+You can then access this class any time by using `YourCoolMod.Instance`!
+
+There are currently a few functions that you can hook into for lifecycle events
+- `Load` - called immediately after your mod loads
+- `PostLoad` - called after all mods have loaded
+- `PreGameLoad` - called before the game loads
+- `PostGameLoad` - called after the game finishes loading
+
+More to come!
+
+### Making Changes
+
+Now that you've got the initial setup done, there are two ways that you can utilize IkenFeline
+1. Using event hooks (recommended)
+1. Patching files directly (advanced)
+
+#### Event Hooks (recommended)
+
+Runtime Detours (hooks) are a monomod method of safely creating overrides to base functionality. The system was designed with multiple mods in mind, so this is the recommended method of creating modifications. This allows you to make modifications without making patches, which a lot simpler, quicker, and easier to use. It does come with some limitations, so in certain cases you may need to go with patches instead.
+
+For example, if you wanted to hook Maritte's fireball ability to, say, have infinite range, you could do this:
+
+```cs
+On.LittleWitch.AbilityFireball.InHitArea += (orig, ability, grid, unit, target, tile) =>
+{
+    return true;
+};
+On.LittleWitch.AbilityFireball.InRange += (orig, ability, grid, unit, target) =>
+{
+    return true;
+};
+```
+
+Make sure you're referencing `MMHOOK_LittleWitch.dll` or `MMHOOK_GameEngine.dll` in your project!
+
+#### Patches (advanced)
+
+Patches are the classic IkenFeline/MonoMod way, by just directly throwing your patches into the respective assemblies. This can be potentially dangerous, however, as your patches may conflict with other mods. It also prevents you from using any sort of debugging, unless someone can figure out how to generated pdb files from monomod patching. I'd recommend using the hooks below, unless this is absolutely necessary.
+
+For example, if you wanted to patch Maritte's ignite ability to, say, have infinite range, you could do this:
 ```cs
 namespace LittleWitch
 {
@@ -68,48 +135,3 @@ namespace LittleWitch
   }
 }
 ```
-
-### HookGen
-
-HookGen is a monomod method of creating runtime detours. This allows you to make modifications without making patches, which IMO is much simpler. I'm not sure if it can private stuff? And redefining variables might like, not be a thing. But it's definitely much much quicker and easier to use. And would go nicely with the IkenFelineMod classes.
-
-For example, if you wanted to hook Maritte's fireball ability to, say, have infinite range, you could do this:
-
-```cs
-On.LittleWitch.AbilityFireball.InHitArea += (orig, ability, grid, unit, target, tile) =>
-{
-    return true;
-};
-On.LittleWitch.AbilityFireball.InRange += (orig, ability, grid, unit, target) =>
-{
-    return true;
-};
-```
-
-Make sure you're referencing `MMHOOK_LittleWitch.dll` or `MMHOOK_GameEngine.dll` in your project!
-
-### IkenFelineMod
-
-An IkenFelineMod class is a good base going forwards, to standardize how mods will get loaded into IkenFeline. Here's an example:
-
-```cs
-// Takes three parameters, a modid, mod name, and version
-[IkenFelineMod("com.username.your-cool-mod", "Your Cool Mod", "1.0")]
-public class YourCoolMod : IkenFelineMod {
-  public override void Load() {
-    Logger.Log("Hello, world!");
-  }
-}
-```
-
-This class can be in any of your DLLs. So for example if you're patching LittleWitch, you could include this class there. Or, you could make a brand new DLL to put it in. The world's your oyster.
-
-If you put your mod class in a standalone assembly that's not referenced by any `*.*.mm.dll` files or any other assembly that IkenFeline loads, you _must_ name your assembly `ModName.dll` and put it in a folder called `ModName` (obviously replacing ModName with your mod's name), or it won't get loaded! Like so:
-```
-IkenFeline
-  - Mods
-    - ModName
-      - ModName.dll
-```
-
-The reason for this is that it minimizes the number of assemblies IkenFeline has to look through to find mod classes, and it paves the way for in the future where other kind of loading (ex. content, scripts) will take place.

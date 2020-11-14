@@ -16,7 +16,7 @@ namespace IkenFeline.Loader
     public class ModPatcher
     {
         private static HashSet<string> patchSets;
-        private static HashSet<string> assemblies;
+        private static List<string> assemblies;
         private static HashSet<string> patches;
         private static List<Type> modTypes;
         public static List<IkenFelineMod> Mods;
@@ -26,47 +26,33 @@ namespace IkenFeline.Loader
         private static readonly HashSet<string> UnpatchableAssemblies =
             new HashSet<string>(StringComparer.CurrentCultureIgnoreCase) { "mscorlib" };
 
-        public static void Initialize()
+        public static List<string> Patch(Dictionary<string, HashSet<string>> patchMap)
         {
-            modTypes = new List<Type>();
-            Logger.Log("Checking for patches...");
+            patchSets = new HashSet<string>();
+            assemblies = patchMap.Keys.ToList();
+            foreach (var set in patchMap.Values)
+            {
+                foreach (var patch in set)
+                {
+                    patchSets.Add(Path.GetDirectoryName(patch));
+                }
+            }
+
             ResolveDirectories = new string[] {
                 Paths.ExecutableDirectory,
                 Paths.ModDirectory
             };
-
-            CollectPatchSets();
-            CollectPatches();
 
             BackupFiles();
 
             ResolveDirectories = ResolveDirectories.Concat(patchSets).ToArray();
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AppDomainResolveHandler);
 
-            ApplyPatches();
+            ApplyPatches(patchMap);
 
             ReplaceFiles();
-            LoadFiles();
 
-            Mods = new List<IkenFelineMod>();
-            foreach (Type type in modTypes)
-            {
-                var mod = (IkenFelineMod)Activator.CreateInstance(type);
-                IkenFelineModAttribute attribute = (IkenFelineModAttribute)type.GetCustomAttribute(typeof(IkenFelineModAttribute));
-                mod.ModName = attribute.Name;
-                mod.ModId = attribute.ModId;
-                mod.Version = attribute.Version;
-                Logger.Log("Loaded Mod: {1} v{2} ({0})", mod.ModId, mod.ModName, mod.Version);
-                Mods.Add(mod);
-                mod.Load();
-            }
-
-            foreach (var mod in Mods)
-            {
-                mod.PostLoad();
-            }
-
-            ModHooks.CreateHooks();
+            return assemblies;
         }
 
         static void BackupFiles()
@@ -116,91 +102,10 @@ namespace IkenFeline.Loader
 
                 File.Copy(outputPath + ext, originalPath + ext);
                 File.Copy(outputPath + ".pdb", originalPath + ".pdb");
-
-                var a = Assembly.LoadFrom(originalPath + ext);
-                FindMods(a);
             }
         }
 
-        static void LoadFiles()
-        {
-            foreach (var assembly in assemblies)
-            {
-                
-            }
-        }
-
-        static void FindMods(Assembly assembly)
-        {
-            try
-            {
-                foreach (Type type in assembly.GetTypes())
-                {
-                    if (type.GetCustomAttributes(typeof(IkenFelineModAttribute), true).Length > 0)
-                    {
-                        modTypes.Add(type);
-                    }
-                }
-            } catch (Exception e) {
-                Logger.Log(e.StackTrace);
-            }
-        }
-
-        private static void CollectPatchSets()
-        {
-            patchSets = new HashSet<string>();
-
-            var directories = Directory.GetDirectories(Paths.ModDirectory);
-
-            foreach (var dir in directories)
-            {
-                patchSets.Add(dir);
-
-                var baseName = Path.GetFileNameWithoutExtension(dir);
-                var basePath = Path.Combine(dir, baseName + ".dll");
-                if (File.Exists(basePath))
-                {
-                    var assembly = Assembly.LoadFrom(basePath);
-                    FindMods(assembly);
-                }
-            }
-        }
-
-        private static void CollectPatches()
-        {
-            patches = new HashSet<string>();
-            assemblies = new HashSet<string>();
-            var files = Directory.GetFiles(Paths.ModDirectory, "*.mm.dll", SearchOption.AllDirectories);
-
-            foreach (var file in files)
-            {
-                patches.Add(file);
-                GetAssembliesFromFile(file);
-            }
-        }
-
-        private static void GetAssembliesFromFile(string file)
-        {
-            var fileName = Path.GetFileNameWithoutExtension(file);
-            try
-            {
-                using (var ass = AssemblyDefinition.ReadAssembly(file))
-                {
-                    foreach (var assRef in ass.MainModule.AssemblyReferences)
-                    {
-                        if (!UnpatchableAssemblies.Contains(assRef.Name) && 
-                            (fileName.StartsWith(assRef.Name, StringComparison.InvariantCultureIgnoreCase) 
-                            || fileName.StartsWith(assRef.Name.Replace(" ", ""), StringComparison.InvariantCultureIgnoreCase)))
-                        {
-                            assemblies.Add(assRef.Name + ".dll");
-                        }
-                        
-                    }
-                }
-            } catch { }
-        }
-
-        public static void ApplyPatch(AssemblyDefinition ass, string assName)
+        public static void ApplyPatch(AssemblyDefinition ass, string assName, HashSet<string> patches)
         {
             using (var monoModder = new RuntimeMonoModder(ass, assName))
             {
@@ -219,19 +124,19 @@ namespace IkenFeline.Loader
                 // Add our dependency resolver to the assembly resolver of the module we are patching
                 moduleResolver.ResolveFailure += ResolverOnResolveFailure;
 
-                monoModder.PerformPatches(Paths.ModDirectory);
+                monoModder.PerformPatches(patches);
 
                 // Then remove our resolver after we are done patching to not interfere with other patchers
                 moduleResolver.ResolveFailure -= ResolverOnResolveFailure;
             }
         }
 
-        public static void ApplyPatches()
+        public static void ApplyPatches(Dictionary<string, HashSet<string>> patchMap)
         {
-            foreach (var assName in assemblies) {
+            foreach (var assName in patchMap.Keys) {
                 using (var ass = AssemblyDefinition.ReadAssembly(assName))
                 {
-                    ApplyPatch(ass, assName);
+                    ApplyPatch(ass, assName, patchMap[assName]);
                 }
             }
         }
@@ -271,7 +176,6 @@ namespace IkenFeline.Loader
                 {
                     assembly.Dispose();
                     var loadedAssembly = Assembly.LoadFrom(path);
-                    FindMods(loadedAssembly);
                     return loadedAssembly;
                 }
 

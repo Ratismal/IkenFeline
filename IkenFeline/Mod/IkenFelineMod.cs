@@ -1,4 +1,5 @@
 ﻿using IkenFeline.LogManager;
+using IkenFeline.Mod;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +10,17 @@ namespace IkenFeline
 {
     public abstract class IkenFelineMod
     {
-        public string ModName { get; set; }
-        public string ModId { get; set; }
-        public Version Version { get; set; } = new Version(0, 1);
+        public ModManifest Manifest { get; private set; }
         public ModLogger Logger;
 
-        public IkenFelineMod()
+        public string ModName { get { return Manifest.Name; } }
+        public Version Version { get; private set; }
+
+        public IkenFelineMod(ModManifest manifest)
         {
+            Manifest = manifest;
             Logger = new ModLogger(this);
+            Version = new Version(Manifest.Version);
         }
 
         public virtual void Load() { }

@@ -9,14 +9,8 @@ namespace IkenFeline.Attributes
 {
     public class IkenFelineModAttribute : Attribute
     {
-        public string ModId;
-        public string Name;
-        public Version Version;
-        public IkenFelineModAttribute(string modid, string name, string version)
+        public IkenFelineModAttribute()
         {
-            ModId = modid;
-            Name = name;
-            Version = new Version(version);
         }
     }
 }

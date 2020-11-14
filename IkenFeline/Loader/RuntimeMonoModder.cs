@@ -1,6 +1,7 @@
 ﻿using IkenFeline.LogManager;
 using Mono.Cecil;
 using MonoMod;
+using MonoMod.DebugIL;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,17 +26,17 @@ namespace IkenFeline.Loader
 
             OutputPath = Path.Combine(Paths.ExecutableDirectory, $"{ass}.Modded{ext}");
             Logger.Log(assemblyName);
+
+            DebugSymbolOutputFormat = DebugSymbolFormat.PDB;
         }
 
-        public void PerformPatches(string modDirectory)
+        public void PerformPatches(HashSet<string> patches)
         {
             Read();
 
-            ReadMod(modDirectory);
-
-            foreach (var directory in Directory.GetDirectories(modDirectory, "*", SearchOption.AllDirectories))
+            foreach (var patch in patches)
             {
-                ReadMod(directory);
+                ReadMod(patch);
             }
 
             MapDependencies();

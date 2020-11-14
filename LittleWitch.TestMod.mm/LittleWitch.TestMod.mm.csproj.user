@@ -5,4 +5,7 @@
     <StartProgram>C:\Users\cat\modding\ikenfell\TestMod\game\MONOMODDED_IkenfellWin.exe</StartProgram>
     <StartWorkingDirectory>C:\Users\cat\modding\ikenfell\TestMod\game\</StartWorkingDirectory>
   </PropertyGroup>
+  <PropertyGroup>
+    <ProjectView>ProjectFiles</ProjectView>
+  </PropertyGroup>
 </Project>

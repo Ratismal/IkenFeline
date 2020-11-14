@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\game\IkenFeline\mods\TestMod\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -36,43 +36,56 @@
   <ItemGroup>
     <Reference Include="GameEngine">
       <HintPath>..\lib\ikenfell\GameEngine.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="LittleWitch">
       <HintPath>..\lib\ikenfell\LittleWitch.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MMHOOK_LittleWitch, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\ikenfell\MMHOOK_LittleWitch.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>..\lib\monomod\Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Mdb">
       <HintPath>..\lib\monomod\Mono.Cecil.Mdb.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb">
       <HintPath>..\lib\monomod\Mono.Cecil.Pdb.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Mono.Cecil.Rocks">
       <HintPath>..\lib\monomod\Mono.Cecil.Rocks.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod">
       <HintPath>..\lib\monomod\MonoMod.exe</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Common">
       <HintPath>..\lib\monomod\MonoMod.Common.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.DebugIL">
       <HintPath>..\lib\monomod\MonoMod.DebugIL.exe</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
       <HintPath>..\lib\monomod\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour.HookGen">
       <HintPath>..\lib\monomod\MonoMod.RuntimeDetour.HookGen.exe</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Utils">
       <HintPath>..\lib\monomod\MonoMod.Utils.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -93,19 +106,26 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Content\Data\map.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\Scripts\testscript.lua">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="manifest.yaml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IkenFeline\IkenFeline.csproj">
       <Project>{467E33CD-90B4-4BBB-8131-ECF45438628F}</Project>
       <Name>IkenFeline</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>pwd
-rm -r ../../../game/IkenFeline/mods/TestMod
-mkdir "../../../game/IkenFeline/mods/TestMod"
-cp LittleWitch.TestMod.mm.dll ../../../game/IkenFeline/mods/TestMod/LittleWitch.TestMod.mm.dll
-</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

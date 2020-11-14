@@ -10,6 +10,7 @@ namespace IkenFeline
 {
     public class IkenFeline
     {
+        public static readonly string Version = "0.1.0";
         public static void Initialize()
         {
             Paths.ObtainPaths();
@@ -18,7 +19,7 @@ namespace IkenFeline
 
         public static void InitiatePatching()
         {
-            ModPatcher.Initialize();
+            ModLoader.Initialize();
         }
     }
 }

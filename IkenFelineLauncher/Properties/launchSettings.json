@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "IkenFelineLauncher": {
+      "commandName": "Project",
+      "commandLineArgs": "--nosteam"
+    }
+  }
+}
